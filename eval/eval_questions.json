@@ -1,0 +1,7 @@
+[
+  {"question": "Which contracts relate to IT or software services?", "expect_keywords": ["software", "IT", "technology", "digital"]},
+  {"question": "Show contracts awarded over £1m", "expect_keywords": ["value", "£"]},
+  {"question": "What construction or building contracts are listed?", "expect_keywords": ["construction", "building", "works"]},
+  {"question": "Which contracts were published by an NHS body?", "expect_keywords": ["NHS", "health"]},
+  {"question": "Are there any consultancy or advisory contracts?", "expect_keywords": ["consultancy", "advisory", "consulting"]}
+]
