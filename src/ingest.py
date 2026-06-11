@@ -3,44 +3,30 @@
 Source: https://www.contractsfinder.service.gov.uk
 Contains public sector information licensed under the Open Government Licence v3.0.
 """
-import json
 import time
 import requests
 import pandas as pd
 
-OCDS_SEARCH_URL = (
-    "https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search"
-)
+OCDS_SEARCH_URL = "https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search"
 
 
 def fetch_notices(pages: int = 5, sleep: float = 1.0) -> list[dict]:
-    """Fetch recent OCDS releases. Each page returns a batch of notices."""
+    """Fetch recent OCDS releases by following the API's own 'next' link."""
     all_releases = []
-    cursor = None
+    url = OCDS_SEARCH_URL + "?order=desc"
     for _ in range(pages):
-        params = {"order": "desc"}
-        if cursor:
-            params["cursor"] = cursor
-        resp = requests.get(OCDS_SEARCH_URL, params=params, timeout=30)
+        resp = requests.get(url, timeout=30)
         resp.raise_for_status()
         payload = resp.json()
-        releases = payload.get("results", []) or payload.get("releases", [])
+        releases = payload.get("releases") or payload.get("results") or []
         if not releases:
             break
         all_releases.extend(releases)
-        cursor = _next_cursor(payload)
-        if not cursor:
+        url = (payload.get("links") or {}).get("next")
+        if not url:
             break
         time.sleep(sleep)
     return all_releases
-
-
-def _next_cursor(payload: dict):
-    links = payload.get("links", {})
-    nxt = links.get("next")
-    if not nxt or "cursor=" not in nxt:
-        return None
-    return nxt.split("cursor=")[-1].split("&")[0]
 
 
 def flatten(releases: list[dict]) -> pd.DataFrame:
